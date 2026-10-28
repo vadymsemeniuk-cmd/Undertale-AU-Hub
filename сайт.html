@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Undertale AU Hub & Card Economy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0a10;
+      --bg-card: #131320;
+      --sidebar-bg: #0e0e18;
+      --border-color: #262640;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ec4899;
+      --accent-cyan: #06b6d4;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --font-pixel: 'Press Start 2P', monospace;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body.theme-classic {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --sidebar-bg: #090d16;
+      --border-color: #334155;
+    }
+
+    body.theme-undertale-bg {
+      background-image: linear-gradient(rgba(10,10,16,0.88), rgba(10,10,16,0.88)), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    .app-layout { display: flex; flex: 1; width: 100%; min-height: 100vh; position: relative; }
+
+    /* SIDEBAR */
+    aside.sidebar {
+      width: 260px;
+      background-color: var(--sidebar-bg);
+      border-right: 2px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 15px;
+      flex-shrink: 0;
+      transition: width 0.3s ease, padding 0.3s ease;
+      z-index: 100;
+    }
+
+    aside.sidebar.collapsed { width: 75px; padding: 20px 8px; }
+    aside.sidebar.collapsed .logo-text,
+    aside.sidebar.collapsed .nav-section-title,
+    aside.sidebar.collapsed .nav-text,
+    aside.sidebar.collapsed .dev-info { display: none; }
+
+    .logo-area {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 20px; margin-bottom: 15px;
+      border-bottom: 2px dashed var(--border-color);
+    }
+
+    .soul-icon {
+      width: 26px; height: 26px; background: var(--accent-pink);
+      clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 50% 80%, 20% 100%, 0% 35%);
+      box-shadow: 0 0 10px var(--accent-pink); flex-shrink: 0;
+    }
+
+    .logo-text { font-family: var(--font-pixel); font-size: 10px; line-height: 1.4; color: var(--accent-yellow); }
+
+    .nav-section-title {
+      font-size: 9px; font-family: var(--font-pixel); text-transform: uppercase;
+      color: var(--text-muted); margin: 15px 5px 8px;
+    }
+
+    .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+    /* ВІЗЕРУНЧАСТІ КНОПКИ В СТИЛІ UNDERTALE */
+    .nav-item, .ut-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px;
+      background: #000; border: 2px solid var(--accent-yellow);
+      color: var(--accent-yellow); cursor: pointer;
+      font-family: var(--font-pixel); font-size: 10px; text-transform: uppercase;
+      transition: all 0.2s ease; text-decoration: none; position: relative;
+      border-radius: 4px; box-shadow: 0 0 5px rgba(245, 158, 11, 0.2);
+    }
+
+    .nav-item::before, .ut-btn::before {
+      content: '◆'; position: absolute; left: 6px; font-size: 8px; color: var(--accent-pink); opacity: 0; transition: opacity 0.2s;
+    }
+
+    .nav-item.active {
+      background: var(--accent-yellow) !important; color: #000 !important;
+      box-shadow: 0 0 12px var(--accent-yellow);
+    }
+    .nav-item.active::before { opacity: 1; color: #000; }
+
+    .nav-item:hover, .ut-btn:hover {
+      background: var(--accent-yellow); color: #000;
+      box-shadow: 0 0 12px var(--accent-yellow);
+    }
+    .nav-item:hover::before, .ut-btn:hover::before { opacity: 1; color: #000; }
+
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+    /* HEADER */
+    header.top-header {
+      height: 65px; background-color: var(--sidebar-bg);
+      border-bottom: 2px solid var(--border-color);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 25px; gap: 15px; position: relative; z-index: 90;
+    }
+
+    .search-bar {
+      display: flex; align-items: center; background: #000;
+      border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; width: 100%; max-width: 320px;
+    }
+    .search-bar input { background: transparent; border: none; color: #fff; outline: none; margin-left: 8px; width: 100%; font-size: 13px; }
+
+    .header-actions { display: flex; align-items: center; gap: 15px; position: relative; }
+
+    .gold-badge {
+      background: rgba(245, 158, 11, 0.15); border: 1px solid var(--accent-yellow);
+      color: var(--accent-yellow); padding: 6px 12px; border-radius: 20px;
+      font-weight: 700; font-size: 12px; font-family: var(--font-pixel); display: flex; align-items: center; gap: 6px;
+    }
+
+    .notif-btn {
+      position: relative; background: #000; border: 1px solid var(--border-color);
+      color: #fff; padding: 8px 12px; border-radius: 50%; cursor: pointer; font-size: 14px;
+    }
+    .notif-badge {
+      position: absolute; top: -4px; right: -4px; background: var(--accent-pink);
+      color: #fff; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 10px;
+    }
+
+    .user-profile {
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
+      padding: 6px 14px; border-radius: 8px; background: #000; border: 1px solid var(--accent-yellow);
+      transition: all 0.2s;
+    }
+
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      background-size: cover; background-position: center;
+      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex-shrink: 0;
+    }
+    .avatar.frame-gold { border: 2px solid var(--accent-yellow); box-shadow: 0 0 8px var(--accent-yellow); }
+    .avatar.frame-neon { border: 2px solid var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); }
+    .avatar.frame-red { border: 2px solid var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
+
+    /* DROPDOWNS */
+    .profile-dropdown, .notif-dropdown {
+      position: absolute; top: 55px; right: 0; width: 280px;
+      background: var(--bg-card); border: 2px solid var(--border-color);
+      border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      display: none; flex-direction: column; padding: 10px 0; z-index: 500;
+    }
+    .profile-dropdown.show, .notif-dropdown.show { display: flex; }
+
+    .dropdown-header { padding: 12px 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; }
+    .dropdown-header .name { font-weight: 700; font-size: 14px; color: var(--accent-yellow); }
+    .dropdown-header .role { font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-top: 2px; }
+
+    .dropdown-item {
+      padding: 10px 15px; font-size: 13px; color: var(--text-main);
+      display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s;
+    }
+    .dropdown-item:hover { background: rgba(139, 92, 246, 0.2); color: #fff; }
+
+    /* CONTENT AREA */
+    .content-area { flex: 1; padding: 25px; overflow-y: auto; }
+    .view-page { display: none; }
+    .view-page.active { display: block; }
+
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.2)), var(--bg-card);
+      border: 2px solid var(--border-color); border-radius: 16px; padding: 25px; margin-bottom: 25px;
+    }
+    .hero-text h1 { font-size: clamp(18px, 2.5vw, 24px); font-weight: 800; margin-bottom: 10px; }
+    .hero-text p { color: var(--text-muted); max-width: 500px; font-size: 14px; margin-bottom: 20px; }
+
+    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+
+    .au-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .au-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.25s; }
+    .au-card:hover { transform: translateY(-5px); border-color: var(--accent-purple); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); }
+    
+    .au-card-img { height: 250px; background-size: cover; background-position: center; position: relative; }
+    .au-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+    .au-card-info { padding: 15px; }
+    .au-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+
+    /* PROFILE STYLES */
+    .profile-page-grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+    .profile-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-box { background: var(--bg-dark); border: 1px solid var(--border-color); padding: 15px; border-radius: 10px; text-align: center; }
+    .stat-value { font-size: 22px; font-weight: 800; color: var(--accent-purple); }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* COMMUNITY HUB */
+    .community-hub-grid { display: grid; grid-template-columns: 240px 1fr; gap: 20px; }
+    .community-topic-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.2s; margin-bottom: 8px; }
+    .community-topic-card:hover, .community-topic-card.active { border-color: var(--accent-pink); background: rgba(236, 72, 153, 0.1); }
+
+    /* READER VIEW & DETAILS */
+    .hub-details-container { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
+    .hub-header { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+    .hub-cover { width: 200px; height: 280px; background-size: cover; background-position: center; border-radius: 8px; border: 1px solid var(--border-color); }
+    
+    .reader-container { background: #000; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    .reader-page-img { max-width: 100%; max-height: 600px; border-radius: 6px; margin: 15px 0; border: 1px solid var(--border-color); }
+    .reader-controls { display: flex; gap: 15px; align-items: center; }
+
+    /* INVENTORY CARDS */
+    .inventory-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
+    .card-item {
+      width: 145px; height: 210px; background: var(--bg-card);
+      border: 2px solid var(--accent-yellow); border-radius: 10px; padding: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between; text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    /* MODAL WINDOWS */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-box {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      width: 480px; max-width: 92%; border-radius: 14px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-box h3 { margin-bottom: 15px; font-size: 18px; }
+    .modal-box input, .modal-box select, .modal-box textarea {
+      width: 100%; padding: 10px; margin-bottom: 12px; background: var(--bg-dark);
+      border: 1px solid var(--border-color); color: #fff; border-radius: 6px; outline: none; font-family: inherit;
+    }
+
+    @media (max-width: 768px) {
+      .app-layout { flex-direction: column; }
+      aside.sidebar { width: 100% !important; border-right: none; border-bottom: 1px solid var(--border-color); }
+      .nav-menu { flex-direction: row; overflow-x: auto; }
+      .search-bar { display: none; }
+      .profile-page-grid, .community-hub-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="mainSidebar">
+      <div class="logo-area">
+        <div class="soul-icon"></div>
+        <div class="logo-text">UNDERTALE<br><span style="color:var(--accent-purple)">AU HUB</span></div>
+      </div>
+
+      <div class="nav-section-title" id="txtNavSection">НАВІГАЦІЯ</div>
+      <ul class="nav-menu">
+        <li class="nav-item active" id="nav-home" onclick="switchTab('home')">🏠 <span class="nav-text" id="txtNavHome">ГОЛОВНА</span></li>
+        <li class="nav-item" id="nav-genres" onclick="switchTab('genres')">🎭 <span class="nav-text" id="txtNavGenres">ЖАНРИ</span></li>
+        <li class="nav-item" id="nav-categories" onclick="switchTab('categories')">📁 <span class="nav-text" id="txtNavCat">КАТЕГОРІЇ</span></li>
+        <li class="nav-item" id="nav-collections" onclick="switchTab('collections')">🌀 <span class="nav-text" id="txtNavCol">КОЛЕКЦІЇ</span></li>
+        <li class="nav-item" id="nav-community" onclick="switchTab('community')">💬 <span class="nav-text" id="txtNavComm">СПІЛЬНОТА</span></li>
+      </ul>
+
+      <div class="nav-section-title" style="margin-top: auto;">РОЗРОБНИК</div>
+      <div class="dev-info" style="font-size: 11px; color: var(--text-muted); padding: 5px 0;">
+        Семенюк Вадим В.<br>
+        УжНУ • ІПЗ-2026
+      </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="ut-btn" style="padding:6px 10px;" onclick="toggleSidebar()">☰</button>
+          
+          <div class="search-bar">
+            <span>🔍</span>
+            <input type="text" id="searchInput" onkeyup="filterAU()" placeholder="Пошук AU, коміксів...">
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <div class="gold-badge">💰 <span id="userGoldDisplay">1000</span> G</div>
+
+          <!-- 🔔 ДЗВІНОЧОК -->
+          <div class="notif-btn" onclick="toggleNotifMenu(event)">
+            🔔 <span class="notif-badge" id="notifCount">2</span>
+          </div>
+
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="dropdown-header">
+              <div class="name" id="txtNotifTitle">🔔 Сповіщення</div>
+            </div>
+            <div id="notifList">
+              <div class="dropdown-item" style="font-size:11px;" id="txtNotif1">🎉 Вітаємо! Нараховано +1000G.</div>
+              <div class="dropdown-item" style="font-size:11px; color:var(--accent-cyan);" id="txtNotif2">🛡️ Статус Голови підтверджено.</div>
+            </div>
+          </div>
+
+          <!-- АКАУНТ МЕНЮ -->
+          <div class="user-profile" onclick="toggleProfileMenu(event)">
+            <div class="avatar" id="headerAvatar">VS</div>
+            <span style="font-size:12px; font-weight:700;" id="headerUsername">Семенюк В.</span>
+            <span style="font-size:10px;">▼</span>
+          </div>
+
+          <!-- DROPDOWN МЕНЮ -->
+          <div class="profile-dropdown" id="profileDropdown">
+            <div class="dropdown-header">
+              <div class="name" id="dropdownName">Семенюк Вадим</div>
+              <div class="role" id="dropdownRole">👑 Голова (Скеле-друг)</div>
+            </div>
+            <div class="dropdown-item" onclick="switchTab('profile')">👤 <span id="txtMenuProf">Профіль користувача</span></div>
+            <div class="dropdown-item" onclick="switchTab('shop')">🛒 <span id="txtMenuShop">Магазин Паків & Рамок</span></div>
+            <div class="dropdown-item" onclick="switchTab('inventory')">🎒 <span id="txtMenuInv">Інвентар карток</span></div>
+            <div class="dropdown-item" onclick="switchTab('bookmarks')">🔖 <span id="txtMenuBook">Закладки</span></div>
+            <div class="dropdown-item" onclick="switchTab('history')">📜 <span id="txtMenuHist">Історія читання</span></div>
+            <div class="dropdown-item" onclick="openCustomizationModal()">🎨 <span id="txtMenuCust">Налаштування профілю</span></div>
+            <div class="dropdown-item" onclick="toggleLanguage()">🌐 <span id="txtMenuLang">Мова: UA 🇺🇦</span></div>
+            <div class="dropdown-item" style="border-top:1px solid var(--border-color); color:var(--accent-pink);" onclick="openAuthModal()">🔐 <span id="txtMenuAuth">Авторизація / Ролі</span></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-area">
+        <!-- 1. HOME VIEW -->
+        <div id="home-view" class="view-page active">
+          <div class="hero-banner">
+            <div class="hero-text">
+              <h1 id="txtHeroTitle">Читай Комікси та Збирай Картки Undertale AU!</h1>
+              <p id="txtHeroDesc">Інтерактивна фанатська платформа з відкритими спільнотами, картковими бустерами та кастомізацією.</p>
+              <button class="ut-btn" id="txtBtnCatalog" onclick="switchTab('categories')">ПЕРЕГЛЯНУТИ КАТАЛОГ</button>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <span id="txtSecPop">🔥 Популярні Альтернативні Всесвіти</span>
+            <button class="ut-btn" style="font-size:9px;" id="txtBtnCreateAu" onclick="openCreateAuModal(false)">+ СТВОРИТИ / РЕДАГУВАТИ AU</button>
+          </div>
+          <div class="au-grid" id="auGridContainer"></div>
+        </div>
+
+        <!-- 2. GENRES & CATEGORIES -->
+        <div id="genres-view" class="view-page">
+          <div class="section-title" id="txtGenresTitle">🎭 Фільтрація за Жанрами</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+            <button class="ut-btn" id="btnFilterAll" onclick="filterByTag('all')">УСІ</button>
+            <button class="ut-btn" id="btnFilterDrama" onclick="filterByTag('Драма')">ДРАМА</button>
+            <button class="ut-btn" id="btnFilterAction" onclick="filterByTag('Екшн')">ЕКШН</button>
+            <button class="ut-btn" id="btnFilterGame" onclick="filterByTag('Гра')">ГРА</button>
+          </div>
+          <div class="au-grid" id="genresGrid"></div>
+        </div>
+
+        <div id="categories-view" class="view-page">
+          <div class="section-title" id="txtCatTitle">📁 Всі Категорії AU Коміксів</div>
+          <div class="au-grid" id="categoriesGrid"></div>
+        </div>
+
+        <!-- 3. COLLECTIONS VIEW -->
+        <div id="collections-view" class="view-page">
+          <div class="section-title" id="txtColTitle">🌀 Колекції та Мультивсесвіти</div>
+          
+          <div style="background:var(--bg-card); border:1px solid var(--border-color); padding:20px; border-radius:12px; margin-bottom:15px;">
+            <h3>Underverse & Glitchtale Saga</h3>
+            <p style="color:var(--text-muted); font-size:13px; margin:5px 0 15px;" id="txtCol1Desc">Головні фанатські епоси спільноти про зіткнення Сансів з різних всесвітів.</p>
+            <button class="ut-btn" style="font-size:9px;" id="btnCol1" onclick="openAUDetails('underverse')">ВІДКРИТИ SAGA UNDERVERSE →</button>
+          </div>
+
+          <div style="background:var(--bg-card); border:1px solid var(--border-color); padding:20px; border-radius:12px; margin-bottom:15px;">
+            <h3>Undertale Yellow Soul Journey</h3>
+            <p style="color:var(--text-muted); font-size:13px; margin:5px 0 15px;" id="txtCol2Desc">Історія про шосту душу Жовтого кольору Кловера.</p>
+            <button class="ut-btn" style="font-size:9px;" id="btnCol2" onclick="openAUDetails('undertale-yellow')">ВІДКРИТИ UNDERTALE YELLOW →</button>
+          </div>
+        </div>
+
+        <!-- 4. PROFILE VIEW -->
+        <div id="profile-view" class="view-page">
+          <div class="section-title" id="txtProfileTitle">👤 Профіль Користувача & Налаштування</div>
+          <div class="profile-page-grid">
+            <div class="profile-card">
+              <div style="text-align:center; margin-bottom:15px;">
+                <div class="avatar" style="width:75px; height:75px; font-size:26px; margin:0 auto 10px;" id="profileAvatar">VS</div>
+                <h2 style="font-size:16px;" id="profileNameDisplay">Семенюк Вадим</h2>
+                <span style="font-size:11px; color:var(--accent-cyan); font-weight:700;" id="profileRoleDisplay">👑 Голова (Скеле-друг)</span>
+              </div>
+
+              <!-- DRAW.IO НАЛАШТУВАННЯ ПРИВАТНОСТІ ТА ОБМІНУ -->
+              <div style="border-top:1px solid var(--border-color); padding-top:15px; font-size:13px;">
+                <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                  <b id="txtPrivateProf">Закритий профіль:</b> 
+                  <input type="checkbox" id="privateProfileCheck" onchange="togglePrivateProfile()">
+                </div>
+                <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                  <b id="txtTradeAllow">Дозвіл обміну картами:</b> 
+                  <input type="checkbox" checked id="tradeAllowCheck">
+                </div>
+                <div style="margin-bottom:12px;">
+                  <b id="txtGenderLabel">Стать:</b> <span id="profileGenderDisplay">Чоловіча</span>
+                </div>
+              </div>
+
+              <button class="ut-btn" style="width:100%; font-size:9px; margin-top:10px;" id="btnCustProf" onclick="openCustomizationModal()">🎨 КАСТОМІЗАЦІЯ ПРОФІЛЮ</button>
+            </div>
+
+            <div>
+              <div class="stats-row">
+                <div class="stat-box">
+                  <div class="stat-value" id="statRead">0</div>
+                  <div class="stat-label" id="txtStatRead">Прочитано</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value" id="statLikes">0</div>
+                  <div class="stat-label" id="txtStatLikes">Лайки</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value" id="statComments">0</div>
+                  <div class="stat-label" id="txtStatComms">Коментарі</div>
+                </div>
+              </div>
+
+              <div class="profile-card">
+                <h3 id="txtBadgesTitle">🏅 Бейджі та Ачівки</h3>
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                  <span style="background:rgba(139,92,246,0.2); border:1px solid var(--accent-purple); padding:6px 12px; border-radius:20px; font-size:11px;">🌟 Першопроходець</span>
+                  <span style="background:rgba(245,158,11,0.2); border:1px solid var(--accent-yellow); padding:6px 12px; border-radius:20px; font-size:11px;">🎴 Мастер SOUL-карт</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. SHOP & INVENTORY -->
+        <div id="shop-view" class="view-page">
+          <div class="section-title" id="txtShopTitle">🛒 Магазин Паків & Кастомних Рамок</div>
+          
+          <h3 style="margin-bottom:12px; font-size:14px; color:var(--accent-yellow);" id="txtBoosterSecTitle">🎴 Бустер-Паки Карт</h3>
+          <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap:20px; margin-bottom:30px;">
+            
+            <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:20px; text-align:center;">
+              <h3>Undertale Yellow Pack</h3>
+              <div style="font-size:32px; margin:10px 0;">🤠</div>
+              <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Drop: Clover, Ceroba, Starlo, Martlet, Axis</p>
+              <button class="ut-btn" style="width:100%;" onclick="buyBooster('Yellow Pack', 300)">КУПИТИ (300G)</button>
+            </div>
+
+            <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:20px; text-align:center;">
+              <h3>Facing Demons Pack</h3>
+              <div style="font-size:32px; margin:10px 0;">🔪</div>
+              <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Drop: Chara Demon, Facing Sans, Real Knife</p>
+              <button class="ut-btn" style="width:100%;" onclick="buyBooster('Facing Demons Pack', 300)">КУПИТИ (300G)</button>
+            </div>
+
+            <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:20px; text-align:center;">
+              <h3>Underverse Pack</h3>
+              <div style="font-size:32px; margin:10px 0;">⚔️</div>
+              <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Drop: Cross Sans, Ink Sans, Error Sans</p>
+              <button class="ut-btn" style="width:100%;" onclick="buyBooster('Underverse Pack', 300)">КУПИТИ (300G)</button>
+            </div>
+
+          </div>
+
+          <h3 style="margin-bottom:12px; font-size:14px; color:var(--accent-cyan);" id="txtFramesSecTitle">✨ Кастомні Рамки Аватарок</h3>
+          <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:15px;">
+            <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; padding:15px; text-align:center;">
+              <h4 id="txtFrameNeonTitle">💙 Неонова Блакитна Рамка</h4>
+              <button class="ut-btn" style="width:100%; margin-top:10px; font-size:8px;" onclick="buyFrame('frame-neon', 150)">КУПИТИ (150G)</button>
+            </div>
+            <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; padding:15px; text-align:center;">
+              <h4 id="txtFrameGoldTitle">💛 Золота Рідкісна Рамка</h4>
+              <button class="ut-btn" style="width:100%; margin-top:10px; font-size:8px;" onclick="buyFrame('frame-gold', 250)">КУПИТИ (250G)</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="inventory-view" class="view-page">
+          <div class="section-title" id="txtInvTitle">🎒 Ваш Інвентар Карт</div>
+          <div class="inventory-grid" id="inventoryContainer">
+            <div class="card-item">
+              <div style="font-size:11px; font-weight:700;">Sans (Classic)</div>
+              <div style="font-size:26px;">💀</div>
+              <div style="font-size:9px; color:var(--accent-cyan);">ATK: 1 | DEF: 1</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. BOOKMARKS & HISTORY -->
+        <div id="bookmarks-view" class="view-page">
+          <div class="section-title" id="txtBookTitle">🔖 Ваші Збережені Закладки</div>
+          <div id="bookmarksContainer" class="au-grid">
+            <p style="color:var(--text-muted);" id="noBookmarksText">У вас поки немає збережених тайтлів.</p>
+          </div>
+        </div>
+
+        <div id="history-view" class="view-page">
+          <div class="section-title" id="txtHistTitle">📜 Історія Читання</div>
+          <div id="historyList" style="display:flex; flex-direction:column; gap:10px;">
+            <p style="color:var(--text-muted);" id="emptyHistoryText">Ваша історія порожня. Почніть читати комікси!</p>
+          </div>
+        </div>
+
+        <!-- 7. COMMUNITY -->
+        <div id="community-view" class="view-page">
+          <div class="section-title" id="txtCommTitle">💬 Спільнота Фанатів & Форум</div>
+          
+          <div class="community-hub-grid">
+            <div>
+              <div class="community-topic-card active" onclick="selectCommunityTopic('all')">
+                <b id="txtCommTopicAll">🌐 Загальний Форум</b>
+                <div style="font-size:11px; color:var(--text-muted);" id="txtCommTopicAllDesc">Обговорення для всіх фанатів</div>
+              </div>
+              <div class="community-topic-card" onclick="selectCommunityTopic('facing-demons')">
+                <b>🔪 Facing Demons</b>
+                <div style="font-size:11px; color:var(--text-muted);" id="txtCommTopicFDDesc">Теорії та арти</div>
+              </div>
+              <div class="community-topic-card" onclick="selectCommunityTopic('undertale-yellow')">
+                <b>🤠 Undertale Yellow</b>
+                <div style="font-size:11px; color:var(--text-muted);" id="txtCommTopicUTYDesc">Пошук перекладачів</div>
+              </div>
+            </div>
+
+            <div style="background:var(--bg-card); border:1px solid var(--border-color); padding:20px; border-radius:12px;">
+              <h3 id="currentTopicTitle">🌐 Загальний Форум Спільноти</h3>
+              <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;" id="txtTopicDesc">Діліться фанатськими роботами та обговорюйте тайтли:</p>
+              
+              <textarea id="communityInput" style="width:100%; height:80px; background:var(--bg-dark); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:8px; margin-bottom:10px;" placeholder="Напишіть допис..."></textarea>
+              <button class="ut-btn" style="font-size:9px;" id="btnPostComm" onclick="postCommunityMsg()">ОПУБЛІКУВАТИ ДОПИС (+10G)</button>
+              
+              <div id="communityList" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. DETAILS & READER VIEW -->
+        <div id="details-view" class="view-page">
+          <button class="ut-btn" style="margin-bottom:15px; font-size:9px;" id="btnBackToHome" onclick="switchTab('home')">← НАЗАД ДО ГОЛОВНОЇ</button>
+
+          <div class="hub-details-container">
+            <div class="hub-header">
+              <div class="hub-cover" id="au-cover"></div>
+              <div class="hub-meta" style="flex:1; min-width: 200px;">
+                <h2 id="au-title-display" style="font-size:24px; margin-bottom:10px;">Назва AU</h2>
+                <div class="credit-box">
+                  <b id="txtAuthorLabel">Автор:</b> <span id="au-author-display">Автор</span><br>
+                  <b id="txtSourceLabel">Джерело:</b> <a id="au-link-display" href="#" target="_blank">Перейти за посиланням 🔗</a>
+                </div>
+                <p id="au-desc-display" style="font-size:14px; color:var(--text-muted); margin: 12px 0;"></p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
+                  <button class="ut-btn" style="font-size:9px;" onclick="likeActiveAu()">❤️ ЛАЙК (<span id="auLikesCount">0</span>)</button>
+                  <button class="ut-btn" style="font-size:9px;" id="btnBookmarkTitle" onclick="bookmarkActiveAu()">🔖 В ЗАКЛАДКИ</button>
+                  <button class="ut-btn" style="font-size:9px;" id="btnEditTitle" onclick="openCreateAuModal(true)">✏️ РЕДАГУВАТИ ТАЙТЛ</button>
+                  <button class="ut-btn" style="font-size:9px; border-color:var(--accent-red); color:var(--accent-red);" id="btnDeleteTitle" onclick="deleteCurrentAu()">🗑️ ВИДАЛИТИ AU</button>
+                </div>
+              </div>
+            </div>
+
+            <h3 id="txtChaptersListTitle">📚 Список Глав</h3>
+            <div class="chapter-list">
+              <div class="chapter-item" onclick="openReader('Глава 1')">
+                <span id="txtCh1Title">📖 Глава 1: Перше Протистояння</span>
+                <span style="color:var(--accent-pink); font-size:13px; font-weight:700;" id="txtChReadAction">Читати (+50G) →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="reader-view" class="view-page">
+          <button class="ut-btn" style="margin-bottom:15px; font-size:9px;" id="btnBackToDetails" onclick="switchTab('details')">← НАЗАД ДО ОПИСУ</button>
+          
+          <div class="reader-container">
+            <h3 id="reader-chapter-title">Глава 1</h3>
+            <img id="reader-img" class="reader-page-img" src="facing_demons.jpg" alt="Сторінка коміксу">
+            <div class="reader-controls">
+              <button class="ut-btn" style="font-size:9px;" id="btnPrevPage" onclick="prevPage()">← НАЗАД</button>
+              <span id="page-num" style="font-family:var(--font-pixel); font-size:11px;">1 / 5</span>
+              <button class="ut-btn" style="font-size:9px;" id="btnNextPage" onclick="nextPage()">ВПЕРЕД →</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНІ ВІКНА -->
+
+  <!-- 1. СТВОРЕННЯ / РЕДАГУВАННЯ AU ТА УПРАВЛІННЯ СТОРІНКАМИ -->
+  <div class="modal-overlay" id="createAuModal">
+    <div class="modal-box">
+      <h3 id="txtModalAuTitle">✏️ Створити / Редагувати AU</h3>
+      <input type="text" id="editAuId" placeholder="ID (наприклад: horrortale)">
+      <input type="text" id="editAuTitle" placeholder="Назва AU (Horrortale)">
+      <input type="text" id="editAuAuthor" placeholder="Автор / Команда">
+      <input type="text" id="editAuLink" placeholder="Посилання на джерело">
+      
+      <!-- ФІКС: МОЖЛИВІСТЬ ЛОКАЛЬНОГО ВИБОРУ ФАЙЛУ АБО ПОСИЛАННЯ -->
+      <label style="font-size:11px; color:var(--text-muted);">Обкладинка AU (URL або локальний файл):</label>
+      <input type="text" id="editAuCover" placeholder="наприклад: facing_demons.jpg або https://...">
+      <input type="file" id="editAuFileInput" accept="image/*" onchange="handleAuCoverFile(event)" style="margin-bottom:12px;">
+
+      <textarea id="editAuDesc" rows="3" placeholder="Опис всесвіту..."></textarea>
+      
+      <label style="font-size:11px; color:var(--text-muted);">Сторінки коміксу (через кому):</label>
+      <input type="text" id="editAuPages" placeholder="facing_demons.jpg, page2.jpg, page3.jpg">
+
+      <div style="display:flex; justify-content:space-between; gap:10px; margin-top:10px;">
+        <button class="ut-btn" style="font-size:8px; border-color:var(--accent-red); color:var(--accent-red);" onclick="deleteAuFromModal()">🗑️ ВИДАЛИТИ</button>
+        <div style="display:flex; gap:10px;">
+          <button class="ut-btn" style="font-size:8px;" onclick="closeModal('createAuModal')">СКАСУВАТИ</button>
+          <button class="ut-btn" style="font-size:8px;" onclick="saveAuData()">ЗБЕРЕГТИ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. КАСТОМІЗАЦІЯ ПРОФІЛЮ, ВЛАСНА АВАТАРКА ТА ШПАЛЕРИ -->
+  <div class="modal-overlay" id="customizationModal">
+    <div class="modal-box">
+      <h3 id="txtModalCustTitle">🎨 Налаштування Профілю & Теми</h3>
+      
+      <label style="font-size:12px; color:var(--text-muted);" id="lblCustNick">Нікнейм користувача:</label>
+      <input type="text" id="custNickname" value="Семенюк Вадим">
+
+      <label style="font-size:12px; color:var(--text-muted);" id="lblCustAv">URL Власної Аватарки (або ініціали):</label>
+      <input type="text" id="custAvatarUrl" placeholder="https://... або ініціали VS">
+
+      <label style="font-size:12px; color:var(--text-muted);" id="lblCustFrame">Екіпірувати Рамку Аватарки:</label>
+      <select id="custFrame">
+        <option value="none">Без рамки</option>
+        <option value="frame-neon">💙 Неонова Блакитна</option>
+        <option value="frame-gold">💛 Золота Рідкісна</option>
+        <option value="frame-red">❤️ Червона Червоного Статусу</option>
+      </select>
+
+      <label style="font-size:12px; color:var(--text-muted);" id="lblCustTheme">Тема оформлення (Шпалери):</label>
+      <select id="custTheme" onchange="applyThemeDirectly()">
+        <option value="neon">💜 Темний Неон</option>
+        <option value="classic">💙 Класичний Синій</option>
+        <option value="undertale-art">✨ Шпалери Undertale Background</option>
+      </select>
+
+      <label style="font-size:12px; color:var(--text-muted);" id="lblCustGender">Стать:</label>
+      <select id="custGender">
+        <option value="Чоловіча">Чоловіча</option>
+        <option value="Жіноча">Жіноча</option>
+        <option value="Не вказано">Не вказано</option>
+      </select>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+        <button class="ut-btn" style="font-size:9px;" onclick="closeModal('customizationModal')">СКАСУВАТИ</button>
+        <button class="ut-btn" style="font-size:9px;" onclick="saveCustomization()">ЗБЕРЕГТИ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. АВТОРИЗАЦІЯ / РОЛІ -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box">
+      <h3 id="txtModalAuthTitle">🔐 Авторизація / Зміна Акаунта</h3>
+      <input type="text" id="authName" value="Семенюк Вадим">
+      <select id="authRole">
+        <option value="👑 Голова (Скеле-друг)">👑 Голова (Скеле-друг) — Розробник</option>
+        <option value="🎨 Автор">🎨 Автор</option>
+        <option value="🖋️ Перекладач">🖋️ Перекладач</option>
+        <option value="👤 Читач">👤 Читач</option>
+      </select>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="ut-btn" style="font-size:9px;" onclick="closeModal('authModal')">СКАСУВАТИ</button>
+        <button class="ut-btn" style="font-size:9px;" onclick="performAuth()">УВІЙТИ</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let userGold = 1000;
+    let activeAuId = 'facing-demons';
+    let currentPage = 1;
+    let currentLang = 'UA';
+
+    let statReadCount = 0;
+    let statLikesCount = 0;
+    let statCommentsCount = 0;
+
+    let historyData = [];
+    let bookmarks = [];
+
+    // ЗОБРАЖЕННЯ ЗА ЗАМОВЧУВАННЯМ (АТМОСФЕРНИЙ ТЕМНИЙ АРТ ПІДЗЕМЕЛЛЯ ЗАМІСТЬ ЗАМКА)
+    const DEFAULT_COVER = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80';
+
+    let auData = {
+      'facing-demons': {
+        title: 'Undertale: Facing Demons',
+        author: 'Team Facing Demons',
+        link: 'https://youtube.com',
+        desc: 'Темний та емоційний всесвіт про протистояння Чари та Санса.',
+        cover: 'facing_demons.jpg',
+        pages: ['facing_demons.jpg'],
+        tag: 'Драма',
+        likes: 0
+      },
+      'undertale-yellow': {
+        title: 'Undertale Yellow',
+        author: 'MasterSword48 & Team Yellow',
+        link: 'https://gamejolt.com',
+        desc: 'Історія про шосту людську душу Жовтого кольору (Справедливість) на ім’я Кловер.',
+        cover: 'undertale_yellow.jpg',
+        pages: ['undertale_yellow.jpg'],
+        tag: 'Гра',
+        likes: 0
+      },
+      'underverse': {
+        title: 'Underverse / X-Tale',
+        author: 'Jael Peñaloza (Jakei)',
+        link: 'https://youtube.com',
+        desc: 'Епічний мультивсесвітній анімаційний серіал про зіткнення Сансів з різних AU.',
+        cover: 'underverse.jpg',
+        pages: ['underverse.jpg'],
+        tag: 'Екшн',
+        likes: 0
+      }
+    };
+
+    function renderAUGrid() {
+      const container = document.getElementById('auGridContainer');
+      const catGrid = document.getElementById('categoriesGrid');
+      const genGrid = document.getElementById('genresGrid');
+
+      let html = '';
+      for (let key in auData) {
+        const item = auData[key];
+        const bgImg = item.cover ? item.cover : DEFAULT_COVER;
+        html += `
+          <div class="au-card" onclick="openAUDetails('${key}')">
+            <div class="au-card-img" style="background-image: url('${bgImg}'), url('${DEFAULT_COVER}');">
+              <span class="au-badge">${item.tag || 'AU'}</span>
+            </div>
+            <div class="au-card-info">
+              <div class="au-title">${item.title}</div>
+              <div style="font-size:12px; color:var(--text-muted);">${currentLang==='UA'?'Автор':'Author'}: ${item.author}</div>
+            </div>
+          </div>
+        `;
+      }
+      if (container) container.innerHTML = html;
+      if (catGrid) catGrid.innerHTML = html;
+      if (genGrid) genGrid.innerHTML = html;
+    }
+
+    function toggleSidebar() { document.getElementById('mainSidebar').classList.toggle('collapsed'); }
+
+    function filterAU() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const container = document.getElementById('auGridContainer');
+      let html = '';
+      for (let key in auData) {
+        const item = auData[key];
+        if (item.title.toLowerCase().includes(query) || item.author.toLowerCase().includes(query)) {
+          const bgImg = item.cover ? item.cover : DEFAULT_COVER;
+          html += `
+            <div class="au-card" onclick="openAUDetails('${key}')">
+              <div class="au-card-img" style="background-image: url('${bgImg}'), url('${DEFAULT_COVER}');">
+                <span class="au-badge">${item.tag || 'AU'}</span>
+              </div>
+              <div class="au-card-info">
+                <div class="au-title">${item.title}</div>
+              </div>
+            </div>
+          `;
+        }
+      }
+      if (container) container.innerHTML = html;
+    }
+
+    function toggleProfileMenu(e) {
+      e.stopPropagation();
+      document.getElementById('notifDropdown').classList.remove('show');
+      document.getElementById('profileDropdown').classList.toggle('show');
+    }
+
+    function toggleNotifMenu(e) {
+      e.stopPropagation();
+      document.getElementById('profileDropdown').classList.remove('show');
+      document.getElementById('notifDropdown').classList.toggle('show');
+    }
+
+    document.addEventListener('click', () => {
+      document.getElementById('profileDropdown').classList.remove('show');
+      document.getElementById('notifDropdown').classList.remove('show');
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.view-page').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      const targetView = document.getElementById(tabId + '-view');
+      if (targetView) targetView.classList.add('active');
+
+      const navBtn = document.getElementById('nav-' + tabId);
+      if (navBtn) navBtn.classList.add('active');
+
+      document.getElementById('profileDropdown').classList.remove('show');
+      document.getElementById('notifDropdown').classList.remove('show');
+    }
+
+    function openAUDetails(auId) {
+      activeAuId = auId;
+      const data = auData[auId];
+      if (!data) return;
+
+      document.getElementById('au-title-display').innerText = data.title;
+      document.getElementById('au-author-display').innerText = data.author;
+      document.getElementById('au-link-display').href = data.link;
+      document.getElementById('au-desc-display').innerText = data.desc;
+      document.getElementById('auLikesCount').innerText = data.likes || 0;
+      
+      const bgImg = data.cover ? data.cover : DEFAULT_COVER;
+      document.getElementById('au-cover').style.backgroundImage = `url('${bgImg}'), url('${DEFAULT_COVER}')`;
+
+      switchTab('details');
+    }
+
+    function likeActiveAu() {
+      if (!activeAuId || !auData[activeAuId]) return;
+      auData[activeAuId].likes = (auData[activeAuId].likes || 0) + 1;
+      document.getElementById('auLikesCount').innerText = auData[activeAuId].likes;
+      
+      statLikesCount++;
+      document.getElementById('statLikes').innerText = statLikesCount;
+      alert(currentLang === 'UA' ? '❤️ Ви поставили лайк!' : '❤️ You liked this AU!');
+    }
+
+    function bookmarkActiveAu() {
+      if (!activeAuId || !auData[activeAuId]) return;
+      if (!bookmarks.includes(activeAuId)) {
+        bookmarks.push(activeAuId);
+        renderBookmarks();
+        alert(currentLang === 'UA' ? '🔖 Додано в закладки!' : '🔖 Added to bookmarks!');
+      } else {
+        alert(currentLang === 'UA' ? 'ℹ️ Цей тайтл вже є у закладках.' : 'ℹ️ Already in bookmarks.');
+      }
+    }
+
+    function renderBookmarks() {
+      const container = document.getElementById('bookmarksContainer');
+      if (bookmarks.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted);">${currentLang==='UA'?'У вас поки немає збережених тайтлів.':'No saved titles yet.'}</p>`;
+        return;
+      }
+      let html = '';
+      bookmarks.forEach(id => {
+        const item = auData[id];
+        if (item) {
+          const bgImg = item.cover ? item.cover : DEFAULT_COVER;
+          html += `
+            <div class="au-card" onclick="openAUDetails('${id}')">
+              <div class="au-card-img" style="background-image: url('${bgImg}'), url('${DEFAULT_COVER}');">
+                <span class="au-badge">${item.tag || 'AU'}</span>
+              </div>
+              <div class="au-card-info">
+                <div class="au-title">${item.title}</div>
+              </div>
+            </div>
+          `;
+        }
+      });
+      container.innerHTML = html;
+    }
+
+    function openReader(chapterName) {
+      document.getElementById('reader-chapter-title').innerText = chapterName;
+      currentPage = 1;
+      updatePage();
+      switchTab('reader');
+      addGold(50);
+
+      statReadCount++;
+      document.getElementById('statRead').innerText = statReadCount;
+
+      const title = auData[activeAuId]?.title || 'Undertale AU';
+      historyData.unshift({ id: activeAuId, title: title, chapter: chapterName });
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('historyList');
+      if (!container) return;
+      if (historyData.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted);">${currentLang==='UA'?'Ваша історія порожня. Почніть читати комікси!':'Your history is empty.'}</p>`;
+        return;
+      }
+      let html = '';
+      historyData.forEach(item => {
+        html += `
+          <div style="background:var(--bg-card); border:1px solid var(--border-color); padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <b style="color:#fff;">${item.title}</b>
+              <div style="font-size:12px; color:var(--text-muted);">${item.chapter}</div>
+            </div>
+            <button class="ut-btn" style="font-size:9px;" onclick="openAUDetails('${item.id}')">${currentLang==='UA'?'Продовжити читання →':'Continue reading →'}</button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function updatePage() { 
+      const data = auData[activeAuId];
+      const pagesList = (data && data.pages && data.pages.length > 0) ? data.pages : [data?.cover || DEFAULT_COVER];
+      const maxPages = pagesList.length;
+
+      document.getElementById('page-num').innerText = `${currentPage} / ${maxPages}`;
+      
+      const imgSrc = pagesList[currentPage - 1] || DEFAULT_COVER;
+      document.getElementById('reader-img').src = imgSrc;
+    }
+
+    function prevPage() { if (currentPage > 1) { currentPage--; updatePage(); } }
+    function nextPage() { 
+      const data = auData[activeAuId];
+      const maxPages = (data && data.pages) ? data.pages.length : 1;
+      if (currentPage < maxPages) { currentPage++; updatePage(); } 
+    }
+
+    function addGold(amount) {
+      userGold += amount;
+      document.getElementById('userGoldDisplay').innerText = userGold;
+    }
+
+    function buyBooster(packName, price) {
+      if (userGold < price) return alert(currentLang === 'UA' ? '❌ Недостатньо Gold!' : '❌ Not enough Gold!');
+      userGold -= price;
+      document.getElementById('userGoldDisplay').innerText = userGold;
+
+      let cardsPool = [];
+      if (packName.includes('Yellow')) {
+        cardsPool = [
+          { name: 'Clover (Justice)', icon: '🤠', atk: 15, def: 10 },
+          { name: 'Ceroba', icon: '🦊', atk: 35, def: 25 },
+          { name: 'Starlo', icon: '⭐', atk: 20, def: 15 }
+        ];
+      } else if (packName.includes('Facing Demons')) {
+        cardsPool = [
+          { name: 'Chara (Demon)', icon: '🔪', atk: 99, def: 99 },
+          { name: 'Facing Sans', icon: '💀', atk: 50, def: 40 }
+        ];
+      } else {
+        cardsPool = [
+          { name: 'Cross Sans', icon: '⚔️', atk: 45, def: 30 },
+          { name: 'Ink Sans', icon: '🎨', atk: 50, def: 50 }
+        ];
+      }
+
+      const drop = cardsPool[Math.floor(Math.random() * cardsPool.length)];
+      const container = document.getElementById('inventoryContainer');
+      const newCard = document.createElement('div');
+      newCard.className = 'card-item';
+      newCard.innerHTML = `
+        <div style="font-size:11px; font-weight:700;">${drop.name}</div>
+        <div style="font-size:26px;">${drop.icon}</div>
+        <div style="font-size:9px; color:var(--accent-cyan);">ATK: ${drop.atk} | DEF: ${drop.def}</div>
+      `;
+      container.appendChild(newCard);
+      alert(`🎉 ${currentLang==='UA'?'Ви вибили картку:':'You got a card:'} ${drop.name}!`);
+    }
+
+    function buyFrame(frameClass, price) {
+      if (userGold < price) return alert(currentLang === 'UA' ? '❌ Недостатньо Gold!' : '❌ Not enough Gold!');
+      userGold -= price;
+      document.getElementById('userGoldDisplay').innerText = userGold;
+
+      const avatarEl = document.getElementById('headerAvatar');
+      avatarEl.className = 'avatar ' + frameClass;
+      alert(currentLang === 'UA' ? '✨ Рамку успішно придбано та застосовано!' : '✨ Frame equipped successfully!');
+    }
+
+    function openCreateAuModal(isEditMode = false) {
+      if (isEditMode && activeAuId && auData[activeAuId]) {
+        const item = auData[activeAuId];
+        document.getElementById('editAuId').value = activeAuId;
+        document.getElementById('editAuTitle').value = item.title;
+        document.getElementById('editAuAuthor').value = item.author;
+        document.getElementById('editAuLink').value = item.link;
+        document.getElementById('editAuCover').value = item.cover || '';
+        document.getElementById('editAuDesc').value = item.desc;
+        document.getElementById('editAuPages').value = (item.pages) ? item.pages.join(', ') : '';
+      } else {
+        document.getElementById('editAuId').value = '';
+        document.getElementById('editAuTitle').value = '';
+        document.getElementById('editAuAuthor').value = '';
+        document.getElementById('editAuLink').value = '';
+        document.getElementById('editAuCover').value = '';
+        document.getElementById('editAuDesc').value = '';
+        document.getElementById('editAuPages').value = '';
+      }
+      document.getElementById('createAuModal').style.display = 'flex';
+    }
+
+    function handleAuCoverFile(e) {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById('editAuCover').value = file.name;
+      }
+    }
+
+    function openCustomizationModal() { document.getElementById('customizationModal').style.display = 'flex'; }
+    function openAuthModal() { document.getElementById('authModal').style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function saveAuData() {
+      const id = document.getElementById('editAuId').value.trim().toLowerCase() || 'au_' + Date.now();
+      const pagesInput = document.getElementById('editAuPages').value.trim();
+      const pagesArray = pagesInput ? pagesInput.split(',').map(s => s.trim()) : [];
+
+      auData[id] = {
+        title: document.getElementById('editAuTitle').value || 'Нове AU',
+        author: document.getElementById('editAuAuthor').value || 'Автор',
+        link: document.getElementById('editAuLink').value || '#',
+        cover: document.getElementById('editAuCover').value.trim() || DEFAULT_COVER,
+        desc: document.getElementById('editAuDesc').value || 'Опис...',
+        pages: pagesArray.length > 0 ? pagesArray : [document.getElementById('editAuCover').value.trim() || DEFAULT_COVER],
+        tag: 'AU',
+        likes: auData[id] ? (auData[id].likes || 0) : 0
+      };
+
+      closeModal('createAuModal');
+      renderAUGrid();
+      alert(currentLang === 'UA' ? '✅ AU успішно збережено та оновлено!' : '✅ AU saved & updated!');
+    }
+
+    function deleteCurrentAu() {
+      if (!activeAuId || !auData[activeAuId]) return;
+      if (confirm(currentLang === 'UA' ? 'Ви дійно хочете видалити це AU?' : 'Delete this AU?')) {
+        delete auData[activeAuId];
+        renderAUGrid();
+        switchTab('home');
+        alert(currentLang === 'UA' ? '🗑️ AU видалено.' : '🗑️ AU deleted.');
+      }
+    }
+
+    function deleteAuFromModal() {
+      const id = document.getElementById('editAuId').value.trim().toLowerCase();
+      if (id && auData[id]) {
+        delete auData[id];
+        renderAUGrid();
+        closeModal('createAuModal');
+        alert(currentLang === 'UA' ? '🗑️ AU видалено.' : '🗑️ AU deleted.');
+      }
+    }
+
+    function saveCustomization() {
+      const nick = document.getElementById('custNickname').value;
+      const avInput = document.getElementById('custAvatarUrl').value.trim();
+      const frame = document.getElementById('custFrame').value;
+      const gender = document.getElementById('custGender').value;
+
+      if (nick) {
+        document.getElementById('headerUsername').innerText = nick;
+        document.getElementById('dropdownName').innerText = nick;
+        document.getElementById('profileNameDisplay').innerText = nick;
+      }
+      
+      const avatarEl = document.getElementById('headerAvatar');
+      const profAvatarEl = document.getElementById('profileAvatar');
+
+      if (avInput.startsWith('http://') || avInput.startsWith('https://')) {
+        avatarEl.style.backgroundImage = `url('${avInput}')`;
+        avatarEl.innerText = '';
+        profAvatarEl.style.backgroundImage = `url('${avInput}')`;
+        profAvatarEl.innerText = '';
+      } else if (avInput) {
+        avatarEl.style.backgroundImage = 'none';
+        avatarEl.innerText = avInput;
+        profAvatarEl.style.backgroundImage = 'none';
+        profAvatarEl.innerText = avInput;
+      }
+
+      avatarEl.className = 'avatar ' + (frame !== 'none' ? frame : '');
+      document.getElementById('profileGenderDisplay').innerText = gender;
+
+      closeModal('customizationModal');
+      alert(currentLang === 'UA' ? '🎨 Налаштування збережено!' : '🎨 Settings saved!');
+    }
+
+    function applyThemeDirectly() {
+      const theme = document.getElementById('custTheme').value;
+      document.body.className = '';
+      if (theme === 'classic') document.body.classList.add('theme-classic');
+      if (theme === 'undertale-art') document.body.classList.add('theme-undertale-bg');
+    }
+
+    function togglePrivateProfile() {
+      const isPrivate = document.getElementById('privateProfileCheck').checked;
+      alert(isPrivate ? (currentLang==='UA'?'🔒 Профіль закритий.':'🔒 Profile private.') : (currentLang==='UA'?'🔓 Профіль відкритий.':'🔓 Profile public.'));
+    }
+
+    function performAuth() {
+      const name = document.getElementById('authName').value;
+      const role = document.getElementById('authRole').value;
+      if (name) {
+        document.getElementById('headerUsername').innerText = name;
+        document.getElementById('dropdownName').innerText = name;
+        document.getElementById('profileNameDisplay').innerText = name;
+      }
+      if (role) {
+        document.getElementById('dropdownRole').innerText = role;
+        document.getElementById('profileRoleDisplay').innerText = role;
+      }
+      closeModal('authModal');
+      alert(currentLang === 'UA' ? '✅ Зміну ролі виконано!' : '✅ Role updated!');
+    }
+
+    function selectCommunityTopic(topicId) {
+      document.querySelectorAll('.community-topic-card').forEach(el => el.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    function postCommunityMsg() {
+      const text = document.getElementById('communityInput').value.trim();
+      if (!text) return;
+      const list = document.getElementById('communityList');
+      const item = document.createElement('div');
+      item.style.background = 'var(--bg-dark)';
+      item.style.border = '1px solid var(--border-color)';
+      item.style.padding = '10px';
+      item.style.borderRadius = '6px';
+      item.style.fontSize = '12px';
+      item.innerHTML = `<b>${document.getElementById('headerUsername').innerText}:</b> ${text}`;
+      list.prepend(item);
+      document.getElementById('communityInput').value = '';
+
+      statCommentsCount++;
+      document.getElementById('statComments').innerText = statCommentsCount;
+      addGold(10);
+      alert(currentLang === 'UA' ? '💬 Допис додано (+10G)!' : '💬 Post published (+10G)!');
+    }
+
+    function filterByTag(tag) {
+      const container = document.getElementById('genresGrid');
+      let html = '';
+      for (let key in auData) {
+        const item = auData[key];
+        if (tag === 'all' || item.tag === tag) {
+          const bgImg = item.cover ? item.cover : DEFAULT_COVER;
+          html += `
+            <div class="au-card" onclick="openAUDetails('${key}')">
+              <div class="au-card-img" style="background-image: url('${bgImg}'), url('${DEFAULT_COVER}');">
+                <span class="au-badge">${item.tag || 'AU'}</span>
+              </div>
+              <div class="au-card-info">
+                <div class="au-title">${item.title}</div>
+              </div>
+            </div>
+          `;
+        }
+      }
+      if (container) container.innerHTML = html;
+    }
+
+    /* 100% ПОВНИЙ ДВОРІВНЕВИЙ ПЕРЕКЛАД УСІХ ЕЛЕМЕНТІВ */
+    function toggleLanguage() {
+      currentLang = currentLang === 'UA' ? 'EN' : 'UA';
+      document.getElementById('txtMenuLang').innerText = currentLang === 'UA' ? 'Мова: UA 🇺🇦' : 'Language: EN 🇬🇧';
+
+      if (currentLang === 'EN') {
+        document.getElementById('txtNavSection').innerText = 'NAVIGATION';
+        document.getElementById('txtNavHome').innerText = 'HOME';
+        document.getElementById('txtNavGenres').innerText = 'GENRES';
+        document.getElementById('txtNavCat').innerText = 'CATEGORIES';
+        document.getElementById('txtNavCol').innerText = 'COLLECTIONS';
+        document.getElementById('txtNavComm').innerText = 'COMMUNITY';
+
+        document.getElementById('txtMenuProf').innerText = 'User Profile';
+        document.getElementById('txtMenuShop').innerText = 'Booster Shop & Frames';
+        document.getElementById('txtMenuInv').innerText = 'Card Inventory';
+        document.getElementById('txtMenuBook').innerText = 'Bookmarks';
+        document.getElementById('txtMenuHist').innerText = 'Reading History';
+        document.getElementById('txtMenuCust').innerText = 'Profile Settings';
+        document.getElementById('txtMenuAuth').innerText = 'Auth / Roles';
+
+        document.getElementById('txtHeroTitle').innerText = 'Read Comics & Collect Undertale AU Cards!';
+        document.getElementById('txtHeroDesc').innerText = 'Interactive fan platform with open communities, booster packs, and customization.';
+        document.getElementById('txtBtnCatalog').innerText = 'VIEW CATALOG';
+        document.getElementById('txtBtnCreateAu').innerText = '+ CREATE / EDIT AU';
+
+        document.getElementById('txtSecPop').innerText = '🔥 Popular Alternate Universes';
+        document.getElementById('txtGenresTitle').innerText = '🎭 Genre Filter';
+        document.getElementById('txtCatTitle').innerText = '📁 All AU Comic Categories';
+        document.getElementById('txtColTitle').innerText = '🌀 Multiverse & Collections';
+        document.getElementById('txtProfileTitle').innerText = '👤 User Profile & Settings';
+        document.getElementById('txtShopTitle').innerText = '🛒 Booster Shop & Custom Frames';
+        document.getElementById('txtInvTitle').innerText = '🎒 Your Card Inventory';
+        document.getElementById('txtBookTitle').innerText = '🔖 Your Saved Bookmarks';
+        document.getElementById('txtHistTitle').innerText = '📜 Reading History';
+        document.getElementById('txtCommTitle').innerText = '💬 Fan Community & Forum';
+
+        document.getElementById('btnFilterAll').innerText = 'ALL';
+        document.getElementById('btnFilterDrama').innerText = 'DRAMA';
+        document.getElementById('btnFilterAction').innerText = 'ACTION';
+        document.getElementById('btnFilterGame').innerText = 'GAME';
+
+        document.getElementById('txtBoosterSecTitle').innerText = '🎴 Card Booster Packs';
+        document.getElementById('txtFramesSecTitle').innerText = '✨ Custom Avatar Frames';
+        document.getElementById('txtFrameNeonTitle').innerText = '💙 Neon Blue Frame';
+        document.getElementById('txtFrameGoldTitle').innerText = '💛 Rare Gold Frame';
+
+        document.getElementById('txtCommTopicAll').innerText = '🌐 General Forum';
+        document.getElementById('txtCommTopicAllDesc').innerText = 'Discussions for all fans';
+        document.getElementById('txtCommTopicFDDesc').innerText = 'Theories and fanart';
+        document.getElementById('txtCommTopicUTYDesc').innerText = 'Translator recruitment';
+        document.getElementById('txtTopicDesc').innerText = 'Share fan creations and discuss titles:';
+        document.getElementById('btnPostComm').innerText = 'POST MESSAGE (+10G)';
+
+        document.getElementById('btnBackToHome').innerText = '← BACK TO HOME';
+        document.getElementById('txtAuthorLabel').innerText = 'Author:';
+        document.getElementById('txtSourceLabel').innerText = 'Source:';
+        document.getElementById('btnBookmarkTitle').innerText = '🔖 BOOKMARK';
+        document.getElementById('btnEditTitle').innerText = '✏️ EDIT TITLE';
+        document.getElementById('btnDeleteTitle').innerText = '🗑️ DELETE AU';
+        document.getElementById('txtChaptersListTitle').innerText = '📚 Chapters';
+        document.getElementById('txtCh1Title').innerText = '📖 Chapter 1: First Confrontation';
+        document.getElementById('txtChReadAction').innerText = 'Read (+50G) →';
+
+        document.getElementById('btnBackToDetails').innerText = '← BACK TO DETAILS';
+        document.getElementById('btnPrevPage').innerText = '← PREVIOUS';
+        document.getElementById('btnNextPage').innerText = 'NEXT →';
+
+        document.getElementById('txtPrivateProf').innerText = 'Private Profile:';
+        document.getElementById('txtTradeAllow').innerText = 'Allow Card Trading:';
+        document.getElementById('txtGenderLabel').innerText = 'Gender:';
+        document.getElementById('btnCustProf').innerText = '🎨 PROFILE CUSTOMIZATION';
+
+        document.getElementById('txtStatRead').innerText = 'Read';
+        document.getElementById('txtStatLikes').innerText = 'Likes';
+        document.getElementById('txtStatComms').innerText = 'Comments';
+        document.getElementById('txtBadgesTitle').innerText = '🏅 Badges & Achievements';
+      } else {
+        document.getElementById('txtNavSection').innerText = 'НАВІГАЦІЯ';
+        document.getElementById('txtNavHome').innerText = 'ГОЛОВНА';
+        document.getElementById('txtNavGenres').innerText = 'ЖАНРИ';
+        document.getElementById('txtNavCat').innerText = 'КАТЕГОРІЇ';
+        document.getElementById('txtNavCol').innerText = 'КОЛЕКЦІЇ';
+        document.getElementById('txtNavComm').innerText = 'СПІЛЬНОТА';
+
+        document.getElementById('txtMenuProf').innerText = 'Профіль користувача';
+        document.getElementById('txtMenuShop').innerText = 'Магазин Паків & Рамок';
+        document.getElementById('txtMenuInv').innerText = 'Інвентар карток';
+        document.getElementById('txtMenuBook').innerText = 'Закладки';
+        document.getElementById('txtMenuHist').innerText = 'Історія читання';
+        document.getElementById('txtMenuCust').innerText = 'Налаштування профілю';
+        document.getElementById('txtMenuAuth').innerText = 'Авторизація / Ролі';
+
+        document.getElementById('txtHeroTitle').innerText = 'Читай Комікси та Збирай Картки Undertale AU!';
+        document.getElementById('txtHeroDesc').innerText = 'Інтерактивна фанатська платформа з відкритими спільнотами, картковими бустерами та кастомізацією.';
+        document.getElementById('txtBtnCatalog').innerText = 'ПЕРЕГЛЯНУТИ КАТАЛОГ';
+        document.getElementById('txtBtnCreateAu').innerText = '+ СТВОРИТИ / РЕДАГУВАТИ AU';
+
+        document.getElementById('txtSecPop').innerText = '🔥 Популярні Альтернативні Всесвіти';
+        document.getElementById('txtGenresTitle').innerText = '🎭 Фільтрація за Жанрами';
+        document.getElementById('txtCatTitle').innerText = '📁 Всі Категорії AU Коміксів';
+        document.getElementById('txtColTitle').innerText = '🌀 Колекції та Мультивсесвіти';
+        document.getElementById('txtProfileTitle').innerText = '👤 Профіль Користувача & Налаштування';
+        document.getElementById('txtShopTitle').innerText = '🛒 Магазин Паків & Рамок';
+        document.getElementById('txtInvTitle').innerText = '🎒 Ваш Інвентар Карт';
+        document.getElementById('txtBookTitle').innerText = '🔖 Ваші Збережені Закладки';
+        document.getElementById('txtHistTitle').innerText = '📜 Історія Читання';
+        document.getElementById('txtCommTitle').innerText = '💬 Спільнота Фанатів & Форум';
+
+        document.getElementById('btnFilterAll').innerText = 'УСІ';
+        document.getElementById('btnFilterDrama').innerText = 'ДРАМА';
+        document.getElementById('btnFilterAction').innerText = 'ЕКШН';
+        document.getElementById('btnFilterGame').innerText = 'ГРА';
+
+        document.getElementById('txtBoosterSecTitle').innerText = '🎴 Бустер-Паки Карт';
+        document.getElementById('txtFramesSecTitle').innerText = '✨ Кастомні Рамки Аватарок';
+        document.getElementById('txtFrameNeonTitle').innerText = '💙 Неонова Блакитна Рамка';
+        document.getElementById('txtFrameGoldTitle').innerText = '💛 Золота Рідкісна Рамка';
+
+        document.getElementById('txtCommTopicAll').innerText = '🌐 Загальний Форум';
+        document.getElementById('txtCommTopicAllDesc').innerText = 'Обговорення для всіх фанатів';
+        document.getElementById('txtCommTopicFDDesc').innerText = 'Теорії та арти';
+        document.getElementById('txtCommTopicUTYDesc').innerText = 'Пошук перекладачів';
+        document.getElementById('txtTopicDesc').innerText = 'Діліться фанатськими роботами та обговорюйте тайтли:';
+        document.getElementById('btnPostComm').innerText = 'ОПУБЛІКУВАТИ ДОПИС (+10G)';
+
+        document.getElementById('btnBackToHome').innerText = '← НАЗАД ДО ГОЛОВНОЇ';
+        document.getElementById('txtAuthorLabel').innerText = 'Автор:';
+        document.getElementById('txtSourceLabel').innerText = 'Джерело:';
+        document.getElementById('btnBookmarkTitle').innerText = '🔖 В ЗАКЛАДКИ';
+        document.getElementById('btnEditTitle').innerText = '✏️ РЕДАГУВАТИ ТАЙТЛ';
+        document.getElementById('btnDeleteTitle').innerText = '🗑️ ВИДАЛИТИ AU';
+        document.getElementById('txtChaptersListTitle').innerText = '📚 Список Глав';
+        document.getElementById('txtCh1Title').innerText = '📖 Глава 1: Перше Протистояння';
+        document.getElementById('txtChReadAction').innerText = 'Читати (+50G) →';
+
+        document.getElementById('btnBackToDetails').innerText = '← НАЗАД ДО ОПИСУ';
+        document.getElementById('btnPrevPage').innerText = '← НАЗАД';
+        document.getElementById('btnNextPage').innerText = 'ВПЕРЕД →';
+
+        document.getElementById('txtPrivateProf').innerText = 'Закритий профіль:';
+        document.getElementById('txtTradeAllow').innerText = 'Дозвіл обміну картами:';
+        document.getElementById('txtGenderLabel').innerText = 'Стать:';
+        document.getElementById('btnCustProf').innerText = '🎨 КАСТОМІЗАЦІЯ ПРОФІЛЮ';
+
+        document.getElementById('txtStatRead').innerText = 'Прочитано';
+        document.getElementById('txtStatLikes').innerText = 'Лайки';
+        document.getElementById('txtStatComms').innerText = 'Коментарі';
+        document.getElementById('txtBadgesTitle').innerText = '🏅 Бейджі та Ачівки';
+      }
+      renderAUGrid();
+    }
+
+    window.onload = function() {
+      renderAUGrid();
+    };
+  </script>
+</body>
+</html>
